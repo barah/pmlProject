@@ -1,0 +1,45 @@
+---
+title: "Prediction Assignment"
+author: "Abdullah AlBar"
+date: "Sunday, September 21, 2014"
+output: html_document
+---
+
+The goal of this project is predict the "classe" variable based on training data.  Initial data examination shows that there are many variables that are mostly empty or have NA value. Because those variables will not add any value to the prediction algorithm, they were removed from the dataset.  
+
+The first step is to load the training data sets and examine its variables 
+```{r}
+pml <- read.csv("pml-training.csv")
+str(pml)
+```
+
+Next we need to split the data sets into training and test sets where 75% of the data will be used for tranning and 25% will be used for testing :
+
+
+```{r}
+set.seed(12345)
+no_obs = nrow(pml)
+pml_rand <- pml[order(runif(no_obs)), ]
+smp_size <- floor(0.75 * no_obs)
+train_ind <- sample(seq_len(no_obs), size = smp_size)
+train <- pml_rand[train_ind, ]
+test <- pml_rand[-train_ind, ]
+```
+
+After that will build the classifier model. Here we are going to use support Vendor machine classifier. 
+
+```{r}
+library(kernlab)
+pml_classifier <- ksvm(classe ~ ., data = train,
+                          kernel = "vanilladot")
+pml_classifier
+```
+Finally we need to evaluate the model on the test data. 
+
+```{r}
+classe_predictions <- predict(pml_classifier, test)
+
+table(classe_predictions, test$classe)
+```
+
+
